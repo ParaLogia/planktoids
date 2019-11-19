@@ -2,8 +2,9 @@ const Util = require('./utils');
 const MovingObject = require('./moving_object');
 // const Asteroid = require('./asteroid');
 
-Bullet.RADIUS = 3;
+Bullet.RADIUS = 7;
 Bullet.COLOR = 'red';
+Bullet.SPRITE_SRC = '../blast.png';
 
 function Bullet(options) {
   MovingObject.call(this, {
@@ -13,6 +14,8 @@ function Bullet(options) {
     radius: Bullet.RADIUS,
     color: Bullet.COLOR
   });
+  this.sprite = new Image();
+  this.sprite.src = Bullet.SPRITE_SRC;
 }
 
 Util.inherits(Bullet, MovingObject);
@@ -24,6 +27,13 @@ Bullet.prototype.move = function () {
   if (this.game.isOutOfBounds(this.pos)) {
     this.game.remove(this);
   }
+};
+
+Bullet.prototype.draw = function (ctx) {
+  const spritePos = Array.from(this.pos);
+  spritePos[0] -= this.radius;
+  spritePos[1] -= this.radius;
+  ctx.drawImage(this.sprite, spritePos[0], spritePos[1], this.radius * 2, this.radius * 2);
 };
 
 

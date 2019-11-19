@@ -5,6 +5,7 @@ const Ship = require('./ship');
 Game.DIM_X = 800;
 Game.DIM_Y = 600;
 Game.NUM_ASTEROIDS = 10;
+Game.BACKGROUND_SRC = '../bacteria.jpg';
 
 function Game() {
   this.asteroids = [];
@@ -16,6 +17,9 @@ function Game() {
     pos: this.randomPosition(),
     game: this
   });
+
+  this.bg = new Image();
+  this.bg.src = Game.BACKGROUND_SRC;
 }
 
 Game.prototype.allObjects = function () {
@@ -38,8 +42,9 @@ Game.prototype.randomPosition = function () {
 };
 
 Game.prototype.draw = function(ctx) {
-  ctx.fillStyle = 'green';
-  ctx.fillRect(0, 0, Game.DIM_X, Game.DIM_Y);
+  // ctx.fillStyle = 'green';
+  // ctx.fillRect(0, 0, Game.DIM_X, Game.DIM_Y);
+  ctx.drawImage(this.bg, 0, 0, Game.DIM_X, Game.DIM_Y);
   this.allObjects().forEach(obj => obj.draw(ctx));
 };
 
