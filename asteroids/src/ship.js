@@ -19,6 +19,7 @@ function Ship(options) {
 
   this.sprite = new Image();
   this.sprite.src = Ship.SPRITE_SRC;
+  this.prevVel = [5, 5];
 }
 
 Util.inherits(Ship, MovingObject);
@@ -26,43 +27,64 @@ Util.inherits(Ship, MovingObject);
 Ship.prototype.draw = function (ctx) {
   
   const spritePos = Array.from(this.pos);
+  const scale = this.flipScale();
+  spritePos[0] *= scale[0];
+  spritePos[1] *= scale[1];
   spritePos[0] -= this.radius;
   spritePos[1] -= this.radius;
-  ctx.translate(spritePos[0], spritePos[1]);
-  ctx.rotate(this.angle());
-  ctx.drawImage(this.sprite, -this.radius, -this.radius, this.radius * 2, this.radius * 2);
-  ctx.rotate(-this.angle());
-  ctx.translate(-spritePos[0], -spritePos[1]);
+  ctx.save();
+  ctx.scale(scale[0], scale[1]);
+  ctx.drawImage(this.sprite, spritePos[0], spritePos[1], this.radius * 2, this.radius * 2);
+  ctx.restore();
 };
 
 Ship.prototype.relocate = function() {
   this.pos = this.game.randomPosition();
   this.vel = [0,0];
+  this.prevVel = [-5, -5];
 };
 
 Ship.prototype.power = function (impulse) {
+  this.prevVel = Array.from(this.vel);
   this.vel[0] += impulse[0];
   this.vel[1] += impulse[1];
 };
 
-Ship.prototype.angle = function() {
-  return Math.atan2(this.vel[1], this.vel[0]);
+Ship.prototype.flipScale = function() {
+  const scale = [1,1];
+  if (this.vel[0] > 0) {
+    scale[0] = -1;
+  }
+  if (this.vel[1] > 0) {
+    scale[1] = -1;
+  }
+  if (this.vel[0] === 0 && this.vel[1] === 0) {
+    if (this.prevVel[0] < 0) {
+      scale[0] = -1;
+    }
+    if (this.prevVel[1] < 0) {
+      scale[1] = -1;
+    }
+  }
+  return scale;
 };
 
 Ship.prototype.fireBullet = function () {
-  if (this.vel[0] === 0 && this.vel[1] === 0) return;
-
   const bulletPos = Array.from(this.pos);
-  bulletPos[0] -= this.radius;
-  bulletPos[1] -= this.radius;
-  const bulletVel = Util.scale(this.vel, 2);
+  const scale = this.flipScale();
+  bulletPos[0] -= this.radius*scale[0];
+  bulletPos[1] -= this.radius*scale[1];
+  
+  let bulletVel = Util.scale(this.vel, 2);
+  if (this.vel[0] === 0 && this.vel[1] === 0) {
+    bulletVel = Util.scale(this.prevVel, -2);
+  }
+
   const bullet = new Bullet({
     pos: bulletPos,
     vel: bulletVel,
     game: this.game
   });
-  // console.log(Asteroid);
-  // console.log(bullet instanceof Ship);
   this.game.bullets.push(bullet);
 };
 
